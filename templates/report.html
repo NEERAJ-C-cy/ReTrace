@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Verification report: case #{{ r.case.id }}</h1>
+<p class="muted">Created {{ r.case.created_at }} (UTC) · SHA-256 <code>{{ r.case.sha256 }}</code></p>
+
+<section class="verdict {{ r.verdict_class }}">
+  <h2>{{ r.case.verdict }}</h2>
+  <p>{{ r.verdict_text }}</p>
+</section>
+
+<section>
+  <h2>Uploaded media</h2>
+  {% if r.case.media_type == 'video' %}
+    <video src="{{ r.upload_url }}" controls width="480"></video>
+  {% else %}
+    <img src="{{ r.upload_url }}" alt="Uploaded media" width="480">
+  {% endif %}
+</section>
+
+<section>
+  <h2>Matching historical media</h2>
+  {% if not r.matches %}
+    <p>No historical item passed the similarity threshold.</p>
+  {% endif %}
+  {% for m in r.matches %}
+    <article class="match">
+      {% if m.hist_type == 'video' %}
+        <video src="{{ m.thumb_url }}" controls width="240"></video>
+      {% else %}
+        <img src="{{ m.thumb_url }}" alt="Historical match" width="240">
+      {% endif %}
+      <dl>
+        <dt>Title</dt>
+        <dd>{{ m.title }}{% if m.is_reference %} <strong>(used for comparison)</strong>{% endif %}</dd>
+
+        <dt>Similarity</dt>
+        <dd>{{ '%.1f'|format(m.similarity * 100) }}% · {{ m.match_type }} · Hamming distance {{ m.distance }} · {{ m.matched_frames }}/{{ m.total_frames }} frames</dd>
+
+        <dt>Source</dt>
+        <dd>
+          {% if m.source_url and m.source_url.startswith(('http://', 'https://')) %}
+            <a href="{{ m.source_url }}" rel="noopener noreferrer">{{ m.source_name or m.source_url }}</a>
+          {% else %}
+            {{ m.source_name or 'not recorded' }}
+          {% endif %}
+        </dd>
+
+        <dt>Published</dt>
+        <dd>{{ m.published_date or 'not recorded' }}</dd>
+
+        <dt>Event date</dt>
+        <dd>{{ m.event_date or 'not recorded' }}</dd>
+
+        <dt>Location</dt>
+        <dd>{{ m.location_text or 'not recorded' }}{% if m.country %}, {{ m.country }}{% endif %}</dd>
+      </dl>
+    </article>
+  {% endfor %}
+</section>
+
+{% if r.reference and r.case.media_type == 'image' and r.reference.hist_type == 'image' %}
+<section>
+  <h2>Visual comparison</h2>
+  <p class="muted">Drag the slider to blend the uploaded image with the comparison match. Differences in crop or overlays show up as ghosting.</p>
+  <div class="overlay-box">
+    <img src="{{ r.upload_url }}" alt="Uploaded media">
+    <img id="overlay-top" src="{{ r.reference.thumb_url }}" alt="Historical match">
+  </div>
+  <input id="overlay-slider" type="range" min="0" max="100" value="50">
+</section>
+{% endif %}
+
+<section>
+  <h2>Evidence timeline</h2>
+  <ol class="timeline">
+    {% for e in r.timeline %}
+      <li class="{{ e.kind }}"><strong>{{ e.date }}</strong> {{ e.label }}</li>
+    {% else %}
+      <li>No dated evidence available.</li>
+    {% endfor %}
+  </ol>
+</section>
+
+<section>
+  <h2>Claimed versus retrieved context</h2>
+  <table>
+    <tr>
+      <th>Field</th>
+      <th>Claimed</th>
+      <th>Retrieved (comparison match)</th>
+    </tr>
+    <tr>
+      <td>Date</td>
+      <td>{{ r.claims.date or '-' }}{% if r.claims.date_source %} <small>({{ r.claims.date_source }})</small>{% endif %}</td>
+      <td>{% if r.reference %}{{ r.reference.event_date or r.reference.published_date or '-' }}{% else %}-{% endif %}</td>
+    </tr>
+    <tr>
+      <td>Place</td>
+      <td>{{ r.claims.places | join(', ') or '-' }}</td>
+      <td>{% if r.reference %}{{ r.reference.location_text or '-' }}{% else %}-{% endif %}</td>
+    </tr>
+    <tr>
+      <td>Event</td>
+      <td>{{ r.claims.events | join(', ') or '-' }}</td>
+      <td>{% if r.reference %}{{ r.reference.title or '-' }}{% else %}-{% endif %}</td>
+    </tr>
+  </table>
+</section>
+
+<section>
+  <h2>Findings and evidence</h2>
+  <ul class="findings">
+    {% for f in r.findings %}
+      <li class="sev-{{ f.severity }}"><strong>{{ f.severity }}</strong>: {{ f.detail }}</li>
+    {% else %}
+      <li>No findings.</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section>
+  <h2>Text found in the media (OCR)</h2>
+  {% if r.ocr_fields %}
+  <dl>
+    {% if r.ocr_fields.name %}<dt>Name</dt><dd>{{ r.ocr_fields.name }}</dd>{% endif %}
+    {% if r.ocr_fields.dob %}<dt>Date of birth</dt><dd>{{ r.ocr_fields.dob }}</dd>{% endif %}
+    {% if r.ocr_fields.gender %}<dt>Gender</dt><dd>{{ r.ocr_fields.gender }}</dd>{% endif %}
+    {% if r.ocr_fields.aadhaar %}<dt>Aadhaar number</dt><dd>{{ r.ocr_fields.aadhaar }}</dd>{% endif %}
+    {% if r.ocr_fields.vid %}<dt>VID</dt><dd>{{ r.ocr_fields.vid }}</dd>{% endif %}
+  </dl>
+  {% endif %}
+  <pre>{{ r.case.ocr_text or 'No text detected, or OCR is unavailable.' }}</pre>
+  {% for d in r.ocr_dates %}
+    <p>Date-like text: {{ d.text }} → {{ d.date }}</p>
+  {% endfor %}
+</section>
+
+<section>
+  <h2>File metadata</h2>
+  <table>
+    {% for k, v in r.metadata.items() if not k.startswith('_') %}
+      <tr>
+        <td>{{ k }}</td>
+        <td>{{ v }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+  <p class="muted">{{ r.metadata.get('_note', '') }}</p>
+</section>
+
+<section class="limits">
+  <h2>Confidence limitations</h2>
+  <ul>
+    {% for l in r.limitations %}
+      <li>{{ l }}</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<button onclick="window.print()">Export as PDF (print)</button>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Trace where this media appeared before</h1>
+<p class="lead">Upload an image or video and describe the claim attached to it. ReTrace looks for earlier copies in the historical database and checks whether the claim fits.</p>
+
+<form id="upload-form" class="grid-2" action="/analyze" method="post" enctype="multipart/form-data">
+  <div>
+    <label id="dropzone" class="dropzone" for="media">
+      <strong>Drop a file here or click to choose</strong>
+      <span>JPG, PNG, WEBP up to 10 MB · MP4, MOV, AVI, MKV up to 100 MB</span>
+      <input id="media" type="file" name="media" required accept=".jpg,.jpeg,.png,.webp,.mp4,.mov,.avi,.mkv">
+    </label>
+    <p id="file-name" class="muted"></p>
+    <div id="preview" class="preview"></div>
+  </div>
+
+  <div class="fields">
+    <label>
+      Caption or claim
+      <textarea name="caption" rows="3" placeholder="e.g. Flood in Pune today"></textarea>
+    </label>
+    <label>
+      Claimed date of the event
+      <input type="date" name="claimed_date">
+    </label>
+    <label>
+      Date the media was posted
+      <input type="date" name="post_date">
+    </label>
+    <label>
+      Claimed location
+      <input name="claimed_location" placeholder="e.g. Pune">
+    </label>
+    <label>
+      Event description
+      <input name="claimed_event" placeholder="e.g. flooding after heavy rain">
+    </label>
+    <button id="submit-btn" class="btn" type="submit">Analyze media</button>
+    <p class="muted">Only enter media you are allowed to analyze. Files stay on this computer.</p>
+  </div>
+</form>
+{% endblock %}

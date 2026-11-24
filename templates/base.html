@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReTrace</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">ReTrace</a>
+    <nav>
+      <a href="/">Investigate</a>
+      <a href="/history">History</a>
+      <a href="/admin">Admin</a>
+    </nav>
+  </header>
+  <main class="container">
+    {% for m in get_flashed_messages() %}
+      <p class="flash" role="alert">{{ m }}</p>
+    {% endfor %}
+    {% block body %}{% endblock %}
+  </main>
+  <footer class="footer">
+    ReTrace provides investigative leads, not proof. Visual similarity does not establish origin, authenticity or falsity.
+  </footer>
+</body>
+</html>
+

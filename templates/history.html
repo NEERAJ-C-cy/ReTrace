@@ -1,0 +1,32 @@
+
+{% extends "base.html" %}
+{% block body %}
+<h1>Investigation history</h1>
+<input id="history-filter" type="search" placeholder="Filter by file, verdict or date">
+<table id="history-table">
+  <thead>
+    <tr>
+      <th>Case</th>
+      <th>File</th>
+      <th>Type</th>
+      <th>Verdict</th>
+      <th>Created</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in cases %}
+    <tr>
+      <td><a href="/report/{{ c.id }}">#{{ c.id }}</a></td>
+      <td>{{ c.original_name }}</td>
+      <td>{{ c.media_type }}</td>
+      <td>{{ c.verdict or c.status }}</td>
+      <td>{{ c.created_at }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="5">No cases yet.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

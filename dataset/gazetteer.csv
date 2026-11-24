@@ -1,0 +1,20 @@
+name,type,parent,aliases
+India,country,,Bharat
+Maharashtra,state,India,
+Mumbai,city,Maharashtra,Bombay
+Pune,city,Maharashtra,Poona
+Kolhapur,city,Maharashtra,
+Chhattisgarh,state,India,
+Raipur,city,Chhattisgarh,
+Delhi,city,India,New Delhi
+Kerala,state,India,
+Kochi,city,Kerala,Cochin
+Tamil Nadu,state,India,
+Chennai,city,Tamil Nadu,Madras
+United Kingdom,country,,UK|Britain
+London,city,United Kingdom,
+France,country,,
+Paris,city,France,
+United States,country,,USA|US|America
+New York,city,United States,
+Pakistan,country,,

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Analysing case #{{ case_id }}</h1>
+<progress id="bar" max="100" value="0"></progress>
+<p id="stage">Starting…</p>
+<script>
+async function poll() {
+  const r = await fetch("/api/cases/{{ case_id }}/status");
+  const s = await r.json();
+  document.getElementById("bar").value = s.percent;
+  document.getElementById("stage").textContent = s.stage;
+  if (s.status === "done" || s.status === "error") {
+    window.location = "/report/{{ case_id }}";
+    return;
+  }
+  setTimeout(poll, 800);
+}
+poll();
+</script>
+{% endblock %}

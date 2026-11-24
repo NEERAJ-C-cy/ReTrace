@@ -1,0 +1,8 @@
+Flask>=3.0
+Pillow>=10.0
+ImageHash>=4.3
+numpy>=1.26
+opencv-python-headless>=4.9
+pytesseract>=0.3.10
+dateparser>=1.2
+pytest>=8.0
